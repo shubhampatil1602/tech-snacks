@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
 const instrumentSerifHeading = Instrument_Serif({
   subsets: ["latin"],
@@ -49,7 +50,10 @@ export default function RootLayout({
         instrumentSerifHeading.variable,
       )}
     >
-      <body className='min-h-full flex flex-col'>{children}</body>
+      <body className='min-h-full flex flex-col'>
+        {children}
+        <Toaster position='bottom-right' />
+      </body>
     </html>
   );
 }

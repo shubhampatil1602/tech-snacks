@@ -7,6 +7,7 @@ import { createOrgSchema, type CreateOrgSchema } from "@/types/org";
 import { nanoid } from "nanoid";
 import { CreateOrgResult } from "@/types/org";
 import { hashPassword } from "better-auth/crypto";
+import { ActionResult } from "@/types/auth";
 
 export async function createOrgAction(
   input: CreateOrgSchema,
@@ -91,4 +92,65 @@ export async function createOrgAction(
       adminPassword,
     },
   };
+}
+
+export async function deleteOrgAction(orgId: string): Promise<ActionResult> {
+  await requireSuperAdmin();
+
+  if (!orgId) return { success: false, error: "Organization ID is required" };
+
+  // 1. get all member userIds in this org
+  const members = await prisma.member.findMany({
+    where: { organizationId: orgId },
+    select: { userId: true },
+  });
+
+  const userIds = members.map((m) => m.userId);
+
+  // 2. delete all sessions of all members
+  await prisma.session.deleteMany({
+    where: { userId: { in: userIds } },
+  });
+
+  // 3. delete all accounts (passwords) of all members
+  await prisma.account.deleteMany({
+    where: { userId: { in: userIds } },
+  });
+
+  // 4. delete the org — cascades Member + Invitation records
+  await prisma.organization.delete({
+    where: { id: orgId },
+  });
+
+  // 5. delete all member user records
+  await prisma.user.deleteMany({
+    where: { id: { in: userIds } },
+  });
+
+  return { success: true };
+}
+
+export async function getOrganizationById(orgId: string) {
+  return await prisma.organization.findUnique({
+    where: { id: orgId },
+    include: {
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              createdAt: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "asc" },
+      },
+      _count: {
+        select: { members: true },
+      },
+    },
+  });
 }

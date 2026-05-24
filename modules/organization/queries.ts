@@ -4,28 +4,21 @@ export async function getAllOrganizations() {
   return await prisma.organization.findMany({
     include: {
       members: {
+        where: { role: "owner" },
         include: {
           user: {
             select: {
               id: true,
               name: true,
               email: true,
-              role: true,
             },
           },
         },
-        where: {
-          role: "owner", // admin is the owner of the org
-        },
       },
       _count: {
-        select: {
-          members: true,
-        },
+        select: { members: true },
       },
     },
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: { createdAt: "desc" },
   });
 }
