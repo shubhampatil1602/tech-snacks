@@ -19,6 +19,7 @@ model User {
   accounts      Account[]
   role          String    @default("user")
   members       Member[]
+  orders        Order[]
 
   @@unique([email])
   @@map("user")
@@ -82,8 +83,11 @@ model Organization {
   metadata   String?
   inviteCode String   @unique
 
-  members     Member[]
-  invitations Invitation[]
+  members      Member[]
+  invitations  Invitation[]
+  orders       Order[]
+  menuItems    MenuItem[]
+  orderWindows OrderWindow[]
 
   @@map("organization")
 }
@@ -112,4 +116,69 @@ model Invitation {
   createdAt      DateTime?
 
   @@map("invitation")
+}
+
+model OrderWindow {
+  id             String @id
+  organizationId String
+
+  label     String // "tea" | "lunch" | "evening" | anything admin types
+  status    String // "active" | "closed"
+  startsAt  DateTime
+  endsAt    DateTime
+  createdBy String // userId of admin who started it
+  createdAt DateTime @default(now())
+
+  orders       Order[]
+  organization Organization @relation(fields: [organizationId], references: [id]) // ← add
+
+  @@map("order_window")
+}
+
+model Order {
+  id             String @id
+  organizationId String
+  userId         String
+  windowId       String
+
+  status       String // "pending" | "placed" | "rejected" | "cancelled"
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  items        OrderItem[]
+  orderWindow  OrderWindow  @relation(fields: [windowId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("order")
+}
+
+model OrderItem {
+  id      String @id
+  orderId String
+
+  menuItemId String
+
+  quantity  Int
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem  MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+
+  @@map("order_item")
+}
+
+model MenuItem {
+  id             String @id
+  organizationId String
+
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  unit        String // "plate" | "piece" | "rs" | "glass"
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems   OrderItem[]
+  organization Organization @relation(fields: [organizationId], references: [id]) // ← add
+
+  @@map("menu_item")
 }
