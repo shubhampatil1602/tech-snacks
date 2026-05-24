@@ -83,11 +83,12 @@ model Organization {
   metadata   String?
   inviteCode String   @unique
 
-  members      Member[]
-  invitations  Invitation[]
-  orders       Order[]
-  menuItems    MenuItem[]
-  orderWindows OrderWindow[]
+  members        Member[]
+  invitations    Invitation[]
+  orders         Order[]
+  menuItems      MenuItem[]
+  orderWindows   OrderWindow[]
+  menuCategories MenuCategory[]
 
   @@map("organization")
 }
@@ -177,8 +178,21 @@ model MenuItem {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  orderItems   OrderItem[]
-  organization Organization @relation(fields: [organizationId], references: [id]) // ← add
+  orderItems     OrderItem[]
+  organization   Organization  @relation(fields: [organizationId], references: [id]) // ← add
+  menuCategory   MenuCategory? @relation(fields: [menuCategoryId], references: [id])
+  menuCategoryId String?
 
   @@map("menu_item")
+}
+
+model MenuCategory {
+  id             String       @id
+  organizationId String
+  name           String // "Drinks", "Snacks", "Food"
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  menuItems      MenuItem[]
+  createdAt      DateTime     @default(now())
+
+  @@map("menu_category")
 }
