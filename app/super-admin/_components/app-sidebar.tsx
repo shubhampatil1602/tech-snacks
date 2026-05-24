@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import {
+  IconCirclePlusFilled,
   IconDashboard,
+  IconGraph,
   IconHelp,
   IconInnerShadowTop,
   IconSettings,
@@ -25,6 +27,16 @@ import Link from "next/link";
 
 const data = {
   navMain: [
+    {
+      title: "Dashboard",
+      url: "/super-admin/dashboard",
+      icon: IconGraph,
+    },
+    {
+      title: "Create Organization",
+      url: "/super-admin/create-org",
+      icon: IconCirclePlusFilled,
+    },
     {
       title: "Manage Organizations",
       url: "/super-admin/manage-org",

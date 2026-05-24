@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { signUpSchema, SignUpSchema } from "@/types/auth";
 import { signUpAction } from "@/actions/auth";
-import { authSession } from "@/actions/user";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -32,11 +31,7 @@ export function RegisterForm() {
     setServerError(null);
     const result = await signUpAction(values);
     if (!result.success) return setServerError(result.error);
-    const session = await authSession();
-    if (session?.user.role === "super_admin")
-      router.push("/super-admin/dashboard");
-    else if (session?.user.role === "admin") router.push("/admin/dashboard");
-    else router.push("/orders");
+    router.push("/");
   }
 
   return (

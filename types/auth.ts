@@ -16,5 +16,5 @@ export type SignUpSchema = z.infer<typeof signUpSchema>;
 export type SignInSchema = z.infer<typeof signInSchema>;
 
 export type ActionResult<T = void> =
-  | { success: true; data?: T }
+  | { success: true; role?: string; data?: T }
   | { success: false; error: string };

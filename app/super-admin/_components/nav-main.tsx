@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { IconCirclePlusFilled, type Icon } from "@tabler/icons-react";
+import { type Icon } from "@tabler/icons-react";
 
 import {
   SidebarGroup,
@@ -30,22 +30,6 @@ export function NavMain({
   return (
     <SidebarGroup>
       <SidebarGroupContent className='flex flex-col gap-2'>
-        <SidebarMenu>
-          <SidebarMenuItem className='flex items-center gap-2'>
-            <Link className='w-full h-full' href={"/super-admin/create-org"}>
-              <SidebarMenuButton
-                tooltip='Quick Create'
-                className={cn(
-                  "min-w-8 duration-200 ease-linear",
-                  pathname === "/super-admin/create-org" && activeClasses,
-                )}
-              >
-                <IconCirclePlusFilled />
-                Create Organization
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
-        </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => {
             const isActive = pathname.startsWith(item.url);

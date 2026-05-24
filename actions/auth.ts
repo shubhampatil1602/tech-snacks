@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db";
 import {
@@ -18,19 +19,15 @@ export async function signUpAction(
   // 1. Validate input
   const parsed = signUpSchema.safeParse(formData);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.message,
-    };
+    return { success: false, error: parsed.error.message };
   }
 
   const { name, email, password, inviteCode } = parsed.data;
 
-  // 2. Check invite code — is this org real?
+  // 2. Check invite code
   const org = await prisma.organization.findUnique({
     where: { inviteCode: inviteCode.toUpperCase() },
   });
-
   if (!org) {
     return { success: false, error: "Invalid organization code" };
   }
@@ -44,10 +41,10 @@ export async function signUpAction(
     };
   }
 
-  // 4. Create user via Better Auth
-  // nextCookies plugin handles setting the session cookie automatically
+  // 4. Create user via Better Auth — session created + cookie set via nextCookies plugin
   const result = await auth.api.signUpEmail({
     body: { name, email, password },
+    headers: await headers(),
   });
 
   if (!result?.user) {
@@ -64,12 +61,6 @@ export async function signUpAction(
       organizationId: org.id,
       role: "member",
     },
-  });
-
-  // 6. Set this org as their active org
-  await auth.api.setActiveOrganization({
-    body: { organizationId: org.id },
-    headers: await headers(),
   });
 
   return { success: true };

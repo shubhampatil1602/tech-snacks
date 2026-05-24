@@ -19,14 +19,14 @@ export async function authIsRequired() {
   return session;
 }
 
-// must NOT be logged in or redirects to /orders
+// must NOT be logged in or redirects to /
 // use in login and register page
 export async function authIsNotRequired() {
   const session = await authSession();
   if (!session) return;
   if (session.user.role === "super_admin") redirect("/super-admin/dashboard");
   if (session.user.role === "admin") redirect("/admin/dashboard");
-  redirect("/dashboard");
+  redirect("/");
 }
 
 // org-level member
@@ -41,7 +41,7 @@ export async function requireAdmin() {
   const session = await authIsRequired();
   const member = await getCurrentMember();
   if (!member || (member.role !== "admin" && member.role !== "owner")) {
-    redirect("/dashboard");
+    redirect("/");
   }
   return { session, member };
 }

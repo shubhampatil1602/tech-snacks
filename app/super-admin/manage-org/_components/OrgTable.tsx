@@ -15,7 +15,7 @@ import { Copy, Check } from "lucide-react";
 import { DeleteOrgDialog } from "./DeleteOrgDialog";
 import type { OrganizationWithDetails } from "@/types/org";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 interface OrgTableProps {
   data: OrganizationWithDetails[];
 }
@@ -23,6 +23,8 @@ interface OrgTableProps {
 export function OrgTable({ data }: OrgTableProps) {
   const [orgs, setOrgs] = useState(data);
   const [copied, setCopied] = useState<string | null>(null);
+
+  const router = useRouter();
 
   async function copyToClipboard(value: string, id: string) {
     await navigator.clipboard.writeText(value);
@@ -32,6 +34,7 @@ export function OrgTable({ data }: OrgTableProps) {
 
   function handleDeleted(orgId: string) {
     setOrgs((prev) => prev.filter((o) => o.id !== orgId));
+    router.refresh();
   }
 
   if (orgs.length === 0) {

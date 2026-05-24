@@ -154,3 +154,34 @@ export async function getOrganizationById(orgId: string) {
     },
   });
 }
+
+export async function getOrgStats() {
+  const [totalOrgs, totalUsers] = await Promise.all([
+    prisma.organization.count(),
+    prisma.user.count({
+      where: { role: { not: "super_admin" } },
+    }),
+  ]);
+
+  return { totalOrgs, totalUsers };
+}
+
+export async function getRecentOrganizations() {
+  return await prisma.organization.findMany({
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    include: {
+      members: {
+        where: { role: "owner" },
+        include: {
+          user: {
+            select: { name: true, email: true },
+          },
+        },
+      },
+      _count: {
+        select: { members: true },
+      },
+    },
+  });
+}

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getAllOrganizations } from "@/modules/organization/queries";
-import { getOrganizationById } from "@/actions/org";
+import { getOrganizationById, getRecentOrganizations } from "@/actions/org";
 
 export const createOrgSchema = z.object({
   orgName: z.string().min(2, "Organization name required"),
@@ -38,3 +38,7 @@ export type OrganizationWithDetails = Awaited<
 export type OrganizationDetail = Awaited<
   ReturnType<typeof getOrganizationById>
 >;
+
+export type RecentOrganization = Awaited<
+  ReturnType<typeof getRecentOrganizations>
+>[number];

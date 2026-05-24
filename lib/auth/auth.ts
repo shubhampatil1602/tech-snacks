@@ -24,6 +24,31 @@ export const auth = betterAuth({
     requireEmailVerification: false,
   },
 
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          // find the user's org membership
+          const member = await prisma.member.findFirst({
+            where: { userId: session.userId },
+          });
+
+          // if they belong to an org, set it as active on session creation
+          if (member) {
+            return {
+              data: {
+                ...session,
+                activeOrganizationId: member.organizationId,
+              },
+            };
+          }
+
+          return { data: session };
+        },
+      },
+    },
+  },
+
   plugins: [
     organization({
       allowUserToCreateOrganization: false,
