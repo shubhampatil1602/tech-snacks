@@ -1,0 +1,166 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { usePagination } from "@/hooks/use-pagination";
+import { MenuFormDialog } from "./MenuFormDialog";
+import { DeleteMenuDialog } from "./DeleteMenuDialog";
+import { toggleMenuItemAvailabilityAction } from "@/actions/menu";
+import type { MenuCategory, MenuItem } from "@/types/menu";
+import { cn } from "@/lib/utils";
+
+interface MenuTableProps {
+  data: MenuItem[];
+  categories: MenuCategory[];
+}
+
+export function MenuTable({ data, categories }: MenuTableProps) {
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+  const [toggledItems, setToggledItems] = useState<Record<string, boolean>>({});
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const items = data
+    .filter((item) => !deletedIds.has(item.id))
+    .map((item) => ({
+      ...item,
+      isAvailable: toggledItems[item.id] ?? item.isAvailable,
+    }))
+    .filter((item) =>
+      selectedCategory === null
+        ? true
+        : item.menuCategoryId === selectedCategory,
+    );
+
+  const pagination = usePagination({ data: items, itemsPerPage: 10 });
+
+  async function handleToggle(id: string, current: boolean) {
+    // optimistic update
+    setToggledItems((prev) => ({ ...prev, [id]: !current }));
+
+    const result = await toggleMenuItemAvailabilityAction(id, !current);
+    if (!result.success) {
+      // revert
+      setToggledItems((prev) => ({ ...prev, [id]: current }));
+      toast.error(result.error);
+    }
+  }
+
+  function handleDeleted(id: string) {
+    setDeletedIds((prev) => new Set(prev).add(id));
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className='border border-dashed p-12 text-center'>
+        <p className='text-sm text-muted-foreground'>
+          No items on the menu yet. Add your first item.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className='space-y-6'>
+      <div className='flex items-center gap-2 flex-wrap'>
+        <Badge
+          className={cn(
+            "cursor-pointer transition-all px-3 py-2 mr-1 border",
+            selectedCategory === null
+              ? "bg-accent opacity-100"
+              : "opacity-50 hover:opacity-75",
+          )}
+          onClick={() => setSelectedCategory(null)}
+        >
+          All {data.filter((i) => !deletedIds.has(i.id)).length}
+        </Badge>
+        {categories.map((cat) => (
+          <Badge
+            key={cat.id}
+            variant={selectedCategory === cat.id ? "default" : "outline"}
+            className={cn(
+              "cursor-pointer transition-all px-3 py-2 border",
+              selectedCategory === cat.id
+                ? "bg-accent opacity-100"
+                : "opacity-50 hover:opacity-75",
+            )}
+            onClick={() => setSelectedCategory(cat.id)}
+          >
+            {cat.name}{" "}
+            {
+              data.filter(
+                (i) => !deletedIds.has(i.id) && i.menuCategoryId === cat.id,
+              ).length
+            }
+          </Badge>
+        ))}
+      </div>
+      <div className='border'>
+        <Table>
+          <TableHeader className='bg-muted'>
+            <TableRow>
+              <TableHead>Item</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Unit</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Available</TableHead>
+              <TableHead className='w-[100px]' />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {pagination.paginatedData.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className='font-medium'>{item.name}</TableCell>
+                <TableCell>₹{Number(item.price).toFixed(2)}</TableCell>
+                <TableCell>
+                  <Badge variant='secondary'>{item.unit}</Badge>
+                </TableCell>
+                <TableCell>
+                  {item.menuCategory ? (
+                    <Badge variant='outline'>{item.menuCategory.name}</Badge>
+                  ) : (
+                    <span className='text-xs text-muted-foreground'>—</span>
+                  )}
+                </TableCell>
+
+                <TableCell>
+                  <Switch
+                    checked={item.isAvailable}
+                    onCheckedChange={() =>
+                      handleToggle(item.id, item.isAvailable)
+                    }
+                  />
+                </TableCell>
+                <TableCell>
+                  <div className='flex items-center gap-1'>
+                    <MenuFormDialog
+                      mode='edit'
+                      item={item}
+                      categories={categories}
+                    />
+                    <DeleteMenuDialog
+                      id={item.id}
+                      name={item.name}
+                      onDeleted={() => handleDeleted(item.id)}
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <DataPagination {...pagination} />
+      </div>
+    </div>
+  );
+}
