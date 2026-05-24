@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { Copy, Check, ArrowLeft } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -87,7 +86,7 @@ export function OrgDetail({ org }: OrgDetailProps) {
         <h2 className='text-sm font-medium mb-3'>Members</h2>
         <div className='border'>
           <Table>
-            <TableHeader>
+            <TableHeader className='bg-muted'>
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>

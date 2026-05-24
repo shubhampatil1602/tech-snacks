@@ -36,7 +36,7 @@ export function RecentOrgsTable({ data }: RecentOrgsTableProps) {
   return (
     <div className='border'>
       <Table>
-        <TableHeader>
+        <TableHeader className='bg-muted'>
           <TableRow>
             <TableHead>Organization</TableHead>
             <TableHead>Admin</TableHead>

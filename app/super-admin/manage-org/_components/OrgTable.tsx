@@ -56,7 +56,7 @@ export function OrgTable({ data }: OrgTableProps) {
   return (
     <div className='border'>
       <Table>
-        <TableHeader>
+        <TableHeader className='bg-muted'>
           <TableRow>
             <TableHead>Organization</TableHead>
             <TableHead>Slug</TableHead>
