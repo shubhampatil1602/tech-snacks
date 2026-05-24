@@ -4,7 +4,7 @@ import { CreateOrganizationForm } from "./_components/CreateOrganizationForm";
 export default async function CreateOrganization() {
   await requireSuperAdmin();
   return (
-    <div className='max-w-7xl px-4'>
+    <div className='px-4'>
       <div className='mb-8'>
         <h1 className='text-2xl font-heading tracking-wide'>
           Create Organization

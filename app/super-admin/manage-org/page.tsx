@@ -7,7 +7,7 @@ export default async function ManageOrgPage() {
   const organizations = await getAllOrganizations();
 
   return (
-    <div className='max-w-7xl px-4'>
+    <div className='px-4'>
       <div className='mb-6'>
         <h1 className='text-2xl font-heading tracking-wide'>
           Manage Organizations

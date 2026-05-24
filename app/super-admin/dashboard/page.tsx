@@ -11,7 +11,7 @@ export default async function SuperAdminDashboard() {
   ]);
 
   return (
-    <div className='space-y-8 max-w-7xl px-4'>
+    <div className='space-y-8 px-4'>
       <div>
         <h1 className='text-2xl font-heading tracking-wide'>
           Welcome back, {session.user.name}
