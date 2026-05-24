@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { usePagination } from "@/hooks/use-pagination";
+import { DataPagination } from "@/components/ui/data-pagination";
 import {
   Table,
   TableBody,
@@ -25,6 +27,8 @@ export function OrgTable({ data }: OrgTableProps) {
   const [copied, setCopied] = useState<string | null>(null);
 
   const router = useRouter();
+
+  const pagination = usePagination({ data: orgs, itemsPerPage: 10 });
 
   async function copyToClipboard(value: string, id: string) {
     await navigator.clipboard.writeText(value);
@@ -147,6 +151,8 @@ export function OrgTable({ data }: OrgTableProps) {
           })}
         </TableBody>
       </Table>
+
+      <DataPagination {...pagination} />
     </div>
   );
 }

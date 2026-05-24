@@ -15,6 +15,8 @@ import {
 import type { OrganizationDetail } from "@/types/org";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Building2 } from "lucide-react";
+import { usePagination } from "@/hooks/use-pagination";
+import { DataPagination } from "@/components/ui/data-pagination";
 
 interface OrgDetailProps {
   org: NonNullable<OrganizationDetail>;
@@ -22,6 +24,8 @@ interface OrgDetailProps {
 
 export function OrgDetail({ org }: OrgDetailProps) {
   const [copied, setCopied] = useState(false);
+
+  const pagination = usePagination({ data: org.members, itemsPerPage: 10 });
 
   async function copyInviteCode() {
     await navigator.clipboard.writeText(org.inviteCode);
@@ -123,6 +127,7 @@ export function OrgDetail({ org }: OrgDetailProps) {
               ))}
             </TableBody>
           </Table>
+          <DataPagination {...pagination} />
         </div>
       </div>
     </div>
