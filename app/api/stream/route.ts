@@ -1,0 +1,91 @@
+import { notifyPool } from "@/lib/sse/pg-notify";
+import { authSession } from "@/actions/user";
+import { prisma } from "@/lib/db";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function GET(request: Request) {
+  // auth check
+  const session = await authSession();
+  if (!session) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  // get user's org
+  const member = await prisma.member.findFirst({
+    where: { userId: session.user.id },
+  });
+
+  if (!member) {
+    return new Response("No organization found", { status: 403 });
+  }
+
+  const orgId = member.organizationId;
+  const encoder = new TextEncoder();
+
+  // set up SSE stream
+  const stream = new ReadableStream({
+    async start(controller) {
+      // send initial connected event
+      controller.enqueue(
+        encoder.encode(`event: connected\ndata: {"status":"ok"}\n\n`),
+      );
+
+      // dedicated pg client for LISTEN
+      const pgClient = await notifyPool.connect();
+
+      try {
+        await pgClient.query("LISTEN snackdesk_events");
+
+        // forward org-scoped events to this client
+        pgClient.on("notification", (msg) => {
+          if (!msg.payload) return;
+          try {
+            const event = JSON.parse(msg.payload);
+            if (event.orgId !== orgId) return; // only this org's events
+            controller.enqueue(
+              encoder.encode(
+                `event: ${event.type}\ndata: ${JSON.stringify(event.payload)}\n\n`,
+              ),
+            );
+          } catch {
+            // ignore malformed payloads
+          }
+        });
+
+        // heartbeat every 30s to keep connection alive
+        const heartbeat = setInterval(() => {
+          try {
+            controller.enqueue(
+              encoder.encode(`event: heartbeat\ndata: {}\n\n`),
+            );
+          } catch {
+            clearInterval(heartbeat);
+          }
+        }, 30000);
+
+        // cleanup on client disconnect
+        request.signal.addEventListener("abort", () => {
+          clearInterval(heartbeat);
+          pgClient
+            .query("UNLISTEN snackdesk_events")
+            .finally(() => pgClient.release());
+          controller.close();
+        });
+      } catch {
+        pgClient.release();
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
+    },
+  });
+}
