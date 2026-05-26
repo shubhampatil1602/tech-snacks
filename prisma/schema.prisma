@@ -126,9 +126,9 @@ model OrderWindow {
   label     String // "tea" | "lunch" | "evening" | anything admin types
   status    String // "active" | "closed"
   startsAt  DateTime
-  endsAt    DateTime
+  endsAt    DateTime?
   createdBy String // userId of admin who started it
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   orders       Order[]
   organization Organization @relation(fields: [organizationId], references: [id]) // ← add
