@@ -27,6 +27,7 @@ export async function spinWheelAction(windowId: string) {
   const excludedIds = [
     "hBnoaYLfQSivXVOcNY5Bj2JgbTWXR4po",
     "ZnQ2LO4x1qu0rGOocGebxXvq0OdTNhqu",
+    "rfxrlBvbryRERoUnpgoy6dXx495yZbou",
   ];
 
   let previousWinnerId: string | null = null;

@@ -14,4 +14,9 @@ export function formatCurrency(amount: number | string): string {
   })}`;
 }
 
-
+export function truncateText(text: string, maxLength: number = 24): string {
+  if (text.length > maxLength) {
+    return `${text.slice(0, maxLength)}...`;
+  }
+  return text;
+}

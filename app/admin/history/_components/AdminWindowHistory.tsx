@@ -1,8 +1,15 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { formatCurrency } from "@/lib/utils";
-import { ChevronDown, ChevronRight, Dot, Search, CalendarDays, Info } from "lucide-react";
+import { formatCurrency, truncateText } from "@/lib/utils";
+import {
+  ChevronDown,
+  ChevronRight,
+  Dot,
+  Search,
+  CalendarDays,
+  Info,
+} from "lucide-react";
 
 import {
   Table,
@@ -45,6 +52,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { markAsPaidAction } from "@/actions/spin-wheel";
 import { AddLateOrderDialog } from "./AddLateOrderDialog";
+import { TruncatedLabel } from "@/components/truncated-label";
 
 type AdminWindowHistoryProps = {
   windows: AdminWindowHistoryType;
@@ -170,13 +178,15 @@ export function AdminWindowHistory({
             const itemTotal = Number(item.menuItem.price) * item.quantity;
             totalPeriodRevenue += itemTotal;
             const shopName = item.menuItem.shop?.name || "Unknown Shop";
-            totalPeriodShopRevenue[shopName] = (totalPeriodShopRevenue[shopName] || 0) + itemTotal;
+            totalPeriodShopRevenue[shopName] =
+              (totalPeriodShopRevenue[shopName] || 0) + itemTotal;
           });
       });
   });
 
   function getPeriodLabel(p: HistoryPeriod) {
-    if (p === "all") return globalPeriodLabel === "All Time" ? "All" : globalPeriodLabel;
+    if (p === "all")
+      return globalPeriodLabel === "All Time" ? "All" : globalPeriodLabel;
     if (p === "today") return "Today";
     if (p === "week") return "Last 7 days";
     return p;
@@ -264,9 +274,16 @@ export function AdminWindowHistory({
             </div>
             <div className='flex items-center h-10 px-3 border bg-muted/10 text-sm shrink-0'>
               <CalendarDays className='mr-2 h-4 w-4 text-muted-foreground' />
-              <span className='text-muted-foreground mr-1.5'>{getPeriodLabel(period)}:</span>
-              <span className='font-semibold'>{formatCurrency(totalPeriodRevenue)}</span>
-              <ShopBreakdownInfo breakdown={totalPeriodShopRevenue} className="ml-1.5" />
+              <span className='text-muted-foreground mr-1.5'>
+                {getPeriodLabel(period)}:
+              </span>
+              <span className='font-semibold'>
+                {formatCurrency(totalPeriodRevenue)}
+              </span>
+              <ShopBreakdownInfo
+                breakdown={totalPeriodShopRevenue}
+                className='ml-1.5'
+              />
             </div>
           </div>
 
@@ -303,7 +320,8 @@ export function AdminWindowHistory({
                   const itemTotal = Number(item.menuItem.price) * item.quantity;
                   windowRevenue += itemTotal;
                   const shopName = item.menuItem.shop?.name || "Unknown Shop";
-                  windowShopRevenue[shopName] = (windowShopRevenue[shopName] || 0) + itemTotal;
+                  windowShopRevenue[shopName] =
+                    (windowShopRevenue[shopName] || 0) + itemTotal;
                 });
             });
 
@@ -381,7 +399,7 @@ export function AdminWindowHistory({
                       </div>
                       <span className='text-muted-foreground text-xs'>·</span>
                       <span className='text-sm font-medium line-clamp-1'>
-                        {window.label}
+                        {truncateText(window.label)}
                       </span>
                       <span className='text-muted-foreground text-xs'>·</span>
                       {window.paid ? (
@@ -440,16 +458,21 @@ export function AdminWindowHistory({
                           <TableHead className='py-2 text-xs font-medium text-center'>
                             <div className='flex items-center justify-center space-x-1.5'>
                               <span>{formatCurrency(windowRevenue)}</span>
-                              <span className='text-muted-foreground text-xs'>·</span>
+                              <span className='text-muted-foreground text-xs'>
+                                ·
+                              </span>
                               <span className='font-normal text-muted-foreground text-xs'>
                                 {
                                   window.orders.filter(
-                                    (o) => o.status === "approved"
+                                    (o) => o.status === "approved",
                                   ).length
                                 }{" "}
                                 orders
                               </span>
-                              <ShopBreakdownInfo breakdown={windowShopRevenue} className="-ml-0.5" />
+                              <ShopBreakdownInfo
+                                breakdown={windowShopRevenue}
+                                className='-ml-0.5'
+                              />
                             </div>
                           </TableHead>
                           <TableHead className='py-2 text-xs font-medium'>

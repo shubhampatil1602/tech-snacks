@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FileText } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, truncateText } from "@/lib/utils";
 
 import {
   Dialog,
@@ -57,7 +57,10 @@ export function OrderWindowSummaryDialog({
   const shopsMap = new Map<string, ShopBreakdown>();
 
   type AltItem = { itemName: string; quantity: number; userName: string };
-  const mergeAlternatives = (target: AltItem[] | undefined, source: AltItem[]) => {
+  const mergeAlternatives = (
+    target: AltItem[] | undefined,
+    source: AltItem[],
+  ) => {
     if (source.length === 0) return target;
     return [...(target || []), ...source];
   };
@@ -86,7 +89,10 @@ export function OrderWindowSummaryDialog({
       if (existing) {
         existing.quantity += item.quantity;
         existing.total += itemTotal;
-        existing.alternatives = mergeAlternatives(existing.alternatives, itemAlternatives);
+        existing.alternatives = mergeAlternatives(
+          existing.alternatives,
+          itemAlternatives,
+        );
         const userEntry = existing.users.find((u) => u.userId === order.userId);
         if (userEntry) userEntry.quantity += item.quantity;
         else
@@ -101,7 +107,8 @@ export function OrderWindowSummaryDialog({
           menuItemId: item.menuItem.id,
           quantity: item.quantity,
           total: itemTotal,
-          alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined,
+          alternatives:
+            itemAlternatives.length > 0 ? itemAlternatives : undefined,
           users: [
             {
               orderId: order.id,
@@ -128,7 +135,10 @@ export function OrderWindowSummaryDialog({
       if (shopItem) {
         shopItem.quantity += item.quantity;
         shopItem.total += itemTotal;
-        shopItem.alternatives = mergeAlternatives(shopItem.alternatives, itemAlternatives);
+        shopItem.alternatives = mergeAlternatives(
+          shopItem.alternatives,
+          itemAlternatives,
+        );
         const userEntry = shopItem.users.find((u) => u.userId === order.userId);
         if (userEntry) userEntry.quantity += item.quantity;
         else
@@ -143,7 +153,8 @@ export function OrderWindowSummaryDialog({
           menuItemId: item.menuItem.id,
           quantity: item.quantity,
           total: itemTotal,
-          alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined,
+          alternatives:
+            itemAlternatives.length > 0 ? itemAlternatives : undefined,
           users: [
             {
               orderId: order.id,
@@ -255,8 +266,17 @@ export function OrderWindowSummaryDialog({
       text += sortedItems
         .map(([name, value]) => {
           let line = `  ${name} × ${value.quantity}`;
-          if (includeAlternatives && value.alternatives && value.alternatives.length > 0) {
-            const altLines = value.alternatives.map(alt => `    ↳ [${alt.userName}] Alt: ${alt.quantity} × ${alt.itemName}`).join("\n");
+          if (
+            includeAlternatives &&
+            value.alternatives &&
+            value.alternatives.length > 0
+          ) {
+            const altLines = value.alternatives
+              .map(
+                (alt) =>
+                  `    ↳ [${alt.userName}] Alt: ${alt.quantity} × ${alt.itemName}`,
+              )
+              .join("\n");
             line += `\n${altLines}`;
           }
           return line;
@@ -281,8 +301,17 @@ export function OrderWindowSummaryDialog({
     const items = breakdown
       .map(([name, value]) => {
         let line = `  ${name} × ${value.quantity}`;
-        if (includeAlternatives && value.alternatives && value.alternatives.length > 0) {
-          const altLines = value.alternatives.map(alt => `    ↳ [${alt.userName}] Alt: ${alt.quantity} × ${alt.itemName}`).join("\n");
+        if (
+          includeAlternatives &&
+          value.alternatives &&
+          value.alternatives.length > 0
+        ) {
+          const altLines = value.alternatives
+            .map(
+              (alt) =>
+                `    ↳ [${alt.userName}] Alt: ${alt.quantity} × ${alt.itemName}`,
+            )
+            .join("\n");
           line += `\n${altLines}`;
         }
         return line;
@@ -306,7 +335,7 @@ export function OrderWindowSummaryDialog({
         displayDate,
         sortedShops,
         combinedTotal,
-        includeAlternatives
+        includeAlternatives,
       );
     } else {
       text = formatSummary(
@@ -348,7 +377,7 @@ export function OrderWindowSummaryDialog({
 
       <DialogContent className='max-w-xl'>
         <DialogHeader>
-          <DialogTitle>{window.label} Window Summary</DialogTitle>
+          <DialogTitle>{truncateText(window.label)} Window Summary</DialogTitle>
           <p className='text-sm font-normal text-muted-foreground'>
             {displayDate}
           </p>

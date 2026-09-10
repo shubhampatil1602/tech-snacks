@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, truncateText } from "@/lib/utils";
 import { Copy, Users, Check, ArrowUpDown } from "lucide-react";
 
 import {
@@ -137,7 +137,9 @@ ${userBreakdown
 
       <DialogContent className='max-w-2xl'>
         <DialogHeader>
-          <DialogTitle>{window.label} Window - User Summary</DialogTitle>
+          <DialogTitle>
+            {truncateText(window.label, 15)} Window - User Summary
+          </DialogTitle>
           <p className='text-sm font-normal text-muted-foreground'>
             {new Date(window.createdAt).toLocaleDateString("en-IN", {
               day: "numeric",
